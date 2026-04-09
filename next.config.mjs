@@ -1,9 +1,11 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig = {
-  /* config options here */
   reactCompiler: true,
   output: 'export',
-  basePath: '/clinix',
+  // Only use the subpath in production (GitHub Pages)
+  basePath: isProd ? '/clinix' : '',
   images: {
     unoptimized: true,
   },
