@@ -6,6 +6,8 @@ const nextConfig = {
   output: 'export',
   // Only use the subpath in production (GitHub Pages)
   basePath: isProd ? '/clinix' : '',
+  assetPrefix: isProd ? '/clinix' : '',
+  trailingSlash: true,
   images: {
     unoptimized: true,
   },
