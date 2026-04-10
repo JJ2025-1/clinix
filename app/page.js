@@ -541,7 +541,7 @@ export default function ClinicApp() {
                     <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-blue-600"><TrendingUp size={28} /></div>
                     <div>
                        <h3 className="text-lg font-bold">Frequent Cohorts</h3>
-                       <p className="text-xs text-slate-400 mt-1">Recurrent patients (>1 visit)</p>
+                       <p className="text-xs text-slate-400 mt-1">Recurrent patients (&gt;1 visit)</p>
                     </div>
                   </div>
                   <div className="space-y-3 flex-1">
