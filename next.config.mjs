@@ -1,8 +1,12 @@
 /** @type {import('next').NextConfig} */
+const isGithubActions = process.env.GITHUB_ACTIONS || false;
+
 const nextConfig = {
   reactCompiler: true,
-  // Removed basePath and assetPrefix for Vercel deployment to avoid 404s at the root.
-  // If you need GitHub Pages support, consider using an environment variable like process.env.GITHUB_ACTIONS.
+  output: 'export',
+  // On GitHub Pages, we need the subpath. On Vercel, we use the root.
+  basePath: isGithubActions ? '/clinix' : '',
+  assetPrefix: isGithubActions ? '/clinix' : '',
   trailingSlash: true,
   images: {
     unoptimized: true,
