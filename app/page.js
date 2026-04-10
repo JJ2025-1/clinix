@@ -45,8 +45,24 @@ export default function ClinicApp() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   const refreshData = () => {
     setSystem(Object.assign(Object.create(Object.getPrototypeOf(system)), system));
+  };
+
+  const handleCancel = (patientId) => {
+    if (system.cancelPatient(patientId)) {
+      setMessage({ type: 'success', text: 'Patient moved to missed list' });
+      refreshData();
+    }
   };
 
   const getWaitingPatients = () => {
@@ -311,7 +327,7 @@ export default function ClinicApp() {
                           Upcoming <span className="ml-2 bg-white/50 px-2 py-0.5 rounded-lg">{waitingPatients.length}</span>
                         </TabBtn>
                         <TabBtn active={queueTab === 'missed'} onClick={() => setQueueTab('missed')}>
-                          Missed <span className="ml-2 bg-slate-200 px-2 py-0.5 rounded-lg">0</span>
+                          Missed <span className="ml-2 bg-slate-200 px-2 py-0.5 rounded-lg">{system.missed.length}</span>
                         </TabBtn>
                       </div>
                     </div>
@@ -323,8 +339,26 @@ export default function ClinicApp() {
                           patient={p} 
                           qNum={101 + system.patients.indexOf(p)} 
                           confirmed={true} 
+                          onCancel={() => handleCancel(p.id)}
                         />
                       ))}
+                      {queueTab === 'missed' && system.missed.map((p, i) => (
+                        <QueueItem 
+                          key={p.id} 
+                          patient={p} 
+                          qNum={101 + i} 
+                          confirmed={false} 
+                          isMissed={true}
+                        />
+                      ))}
+                      {queueTab === 'missed' && system.missed.length === 0 && (
+                        <div className="text-center py-16">
+                          <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-200">
+                             <Users size={40} />
+                          </div>
+                          <p className="text-slate-400 font-bold italic">No missed patients</p>
+                        </div>
+                      )}
                       {queueTab === 'upcoming' && waitingPatients.length === 0 && (
                         <div className="text-center py-16">
                           <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-200">
@@ -595,21 +629,28 @@ function TabBtn({ active, onClick, children }) {
   );
 }
 
-function QueueItem({ patient, qNum, confirmed }) {
+function QueueItem({ patient, qNum, confirmed, onCancel, isMissed }) {
   return (
     <div className="border border-slate-100 rounded-3xl p-6 flex items-center justify-between group hover:border-[#2d55a4]/30 transition-all bg-white shadow-sm hover:shadow-md">
       <div className="flex items-center gap-5">
         <div className="w-12 h-12 bg-blue-50 text-[#2d55a4] rounded-2xl flex items-center justify-center font-black text-lg border border-blue-100 shadow-inner">{patient.name[0]}</div>
         <div>
           <p className="font-black text-lg text-slate-800">{patient.name}</p>
-          <p className={`text-[10px] flex items-center gap-1.5 font-bold uppercase tracking-widest ${confirmed ? 'text-green-500' : 'text-slate-300'}`}>
-            <span className={`w-2 h-2 rounded-full ${confirmed ? 'bg-green-500' : 'bg-slate-300'}`}></span> {confirmed ? 'Patient Confirmed' : 'In Queue'}
+          <p className={`text-[10px] flex items-center gap-1.5 font-bold uppercase tracking-widest ${isMissed ? 'text-red-400' : confirmed ? 'text-green-500' : 'text-slate-300'}`}>
+            <span className={`w-2 h-2 rounded-full ${isMissed ? 'bg-red-400' : confirmed ? 'bg-green-500' : 'bg-slate-300'}`}></span> {isMissed ? 'Patient Missed' : confirmed ? 'Patient Confirmed' : 'In Queue'}
           </p>
         </div>
       </div>
       <div className="flex items-center gap-5">
         <div className="bg-slate-100 text-slate-500 text-xs font-black px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">#{qNum}</div>
-        <button className="py-2.5 px-6 border border-red-50 text-red-400 text-xs font-black rounded-xl hover:bg-red-50 hover:border-red-100 transition-all">Cancel</button>
+        {!isMissed && (
+          <button 
+            onClick={onCancel}
+            className="py-2.5 px-6 border border-red-50 text-red-400 text-xs font-black rounded-xl hover:bg-red-50 hover:border-red-100 transition-all"
+          >
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   );
