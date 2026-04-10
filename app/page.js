@@ -173,8 +173,8 @@ export default function ClinicApp() {
               <input name="doctorName" required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#2d55a4] transition-all" placeholder="Dr. Jeevan" />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Employee ID</label>
-              <input name="doctorId" required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#2d55a4] transition-all" placeholder="EMP-123" />
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Standard Doc ID</label>
+              <input name="doctorId" required className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:border-[#2d55a4] transition-all" placeholder="DOC-123" />
             </div>
             <div>
               <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 block">Phone Number</label>
