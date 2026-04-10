@@ -10,7 +10,7 @@ export default function ClinicApp() {
   const [system, setSystem] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState({ name: '', id: '', phone: '' });
-  const [activeTab, setActiveTab] = useState('home'); // Now representing EMR
+  const [activeTab, setActiveTab] = useState('home'); 
   const [queueTab, setQueueTab] = useState('upcoming');
   const [searchId, setSearchId] = useState('');
   const [searchResult, setSearchResult] = useState(null);
@@ -175,69 +175,82 @@ export default function ClinicApp() {
 
   if (!system) return null;
 
-  // Redesigned Login View based on image
+  // Redesigned Login View to EXACTLY match the image theme
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen w-full flex flex-col md:flex-row bg-[#1a4fbc] text-white">
-        {/* Left Side: Content */}
-        <div className="flex-1 flex flex-col justify-center px-8 md:px-20 py-12">
+      <div className="min-h-screen w-full flex flex-col md:flex-row bg-[#1a4fbc] font-sans selection:bg-orange-200">
+        {/* Left Side: Hero Content */}
+        <div className="flex-1 flex flex-col justify-center px-10 md:px-24 py-16 text-white">
           <div className="mb-12">
-            <h2 className="text-3xl font-black tracking-tight mb-8">Clinix</h2>
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
+            <div className="text-4xl font-black tracking-tighter mb-16 flex items-center gap-2">
+               <Activity size={32} className="text-orange-400" /> Clinix
+            </div>
+            
+            <h1 className="text-5xl md:text-8xl font-bold leading-[1.1] mb-8 tracking-tight">
               Run Your Clinic <br />
               <span className="text-[#ff782d]">Smarter.</span> Not Harder.
             </h1>
-            <p className="text-xl text-blue-100/80 max-w-xl leading-relaxed mb-10">
-              Clinix is the all-in-one powered clinic management system that securely stores, accesses and shares complete patient histories, diagnoses, prescriptions and medical notes digitally from anywhere.
+            
+            <p className="text-xl md:text-2xl text-blue-50/80 max-w-xl leading-relaxed mb-12 font-medium">
+              Clinix is the all-in-one powered clinic management system that handles appointments, billing, EMR, prescriptions and more. So you can focus on what truly matters: your patients.
             </p>
             
-            <div className="space-y-5">
-              <FeatureItem text="Personalized dashboard tailored to your specialty" />
-              <FeatureItem text="No commitment, completely free for clinical practice" />
-              <FeatureItem text="Go live in as little as 24 hours after sign up" />
+            <div className="space-y-6 mb-16">
+              <CheckItem text="Personalized demo tailored to your specialty" />
+              <CheckItem text="No commitment, completely free" />
+              <CheckItem text="Go live in as little as 24 hours after sign up" />
             </div>
-          </div>
-          
-          <div className="flex gap-10 opacity-60 text-sm font-medium">
-             <span className="flex items-center gap-2"><CheckCircle2 size={16} /> No credit card required</span>
-             <span className="flex items-center gap-2"><CheckCircle2 size={16} /> Setup in 24 hours</span>
+
+            <div className="flex flex-wrap gap-8 pt-8 border-t border-white/10">
+               <div className="flex items-center gap-2 text-sm font-bold text-blue-100">
+                 <Check size={18} className="text-emerald-400" /> No credit card required
+               </div>
+               <div className="flex items-center gap-2 text-sm font-bold text-blue-100">
+                 <Check size={18} className="text-emerald-400" /> Setup in 24 hours
+               </div>
+            </div>
           </div>
         </div>
 
-        {/* Right Side: Login Card */}
-        <div className="flex-1 flex items-center justify-center p-6 md:p-12">
-          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-[540px] p-8 md:p-12 text-slate-900">
-            <div className="mb-10">
-              <h3 className="text-3xl font-bold mb-2">Clinician Login</h3>
-              <p className="text-slate-500 font-medium">Please enter your credentials to access the EMR system.</p>
+        {/* Right Side: Exact Form Card from Image */}
+        <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
+          {/* Subtle glow behind card */}
+          <div className="absolute inset-0 bg-blue-400/10 blur-[120px] rounded-full"></div>
+          
+          <div className="bg-white rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] w-full max-w-[580px] p-10 md:p-16 text-slate-900 z-10 relative border border-white/20">
+            <div className="mb-12">
+              <h3 className="text-4xl font-bold mb-4 tracking-tight">Clinician Portal</h3>
+              <p className="text-slate-500 text-lg font-medium leading-relaxed">
+                Fill in the details. Access your medical workspace within seconds.
+              </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Full Name *</label>
-                <input name="doctorName" required className="w-full border border-slate-200 rounded-xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium" placeholder="Full name" />
+            <form onSubmit={handleLogin} className="space-y-8">
+              <div className="space-y-3">
+                <label className="text-sm font-bold text-slate-800 ml-1">Full Name *</label>
+                <input name="doctorName" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-5 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white outline-none transition-all text-lg font-medium placeholder:text-slate-300" placeholder="Full name" />
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Standard Doc ID *</label>
-                  <input name="doctorId" required className="w-full border border-slate-200 rounded-xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium" placeholder="DOC-123" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-sm font-bold text-slate-800 ml-1">Standard Doc ID *</label>
+                  <input name="doctorId" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-5 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white outline-none transition-all text-lg font-medium placeholder:text-slate-300" placeholder="DOC-123" />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Phone Number *</label>
-                  <input name="doctorPhone" required className="w-full border border-slate-200 rounded-xl px-5 py-4 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium" placeholder="+91 98765 43210" />
+                <div className="space-y-3">
+                  <label className="text-sm font-bold text-slate-800 ml-1">Phone Number *</label>
+                  <input name="doctorPhone" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-5 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white outline-none transition-all text-lg font-medium placeholder:text-slate-300" placeholder="+91 98765 43210" />
                 </div>
               </div>
 
-              <div className="pt-4">
-                <button type="submit" className="w-full bg-[#ff782d] text-white py-5 rounded-2xl font-bold text-lg shadow-xl shadow-orange-500/20 hover:bg-[#e66a25] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                  Access Dashboard →
+              <div className="pt-6">
+                <button type="submit" className="w-full bg-[#ff782d] text-white py-6 rounded-[20px] font-bold text-xl shadow-[0_20px_40px_-8px_rgba(255,120,45,0.3)] hover:bg-[#e66a25] hover:shadow-[0_24px_48px_-8px_rgba(255,120,45,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                  Enter Dashboard <ArrowRight size={24} strokeWidth={3} />
                 </button>
               </div>
             </form>
             
-            <p className="mt-8 text-center text-slate-400 text-xs font-medium">
-              By logging in, you agree to the Clinix Privacy Policy and Terms of Service.
+            <p className="mt-10 text-center text-slate-400 text-sm font-medium leading-relaxed">
+              By accessing the portal, you agree to the Clinix secure data handling protocols. No spam, ever.
             </p>
           </div>
         </div>
@@ -364,7 +377,7 @@ export default function ClinicApp() {
             
             {activeTab === 'home' && (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-slate-900 dark:text-white">
                   <StatCard label="Waiting Queue" value={waitingPatients.length} subValue="Patients active" icon={<Users className="text-blue-500" />} />
                   <StatCard label="EMR Monthly" value={system.getTotalVisitsThisMonth()} subValue="Records created" icon={<Activity className="text-emerald-500" />} />
                   <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-xl flex flex-col justify-between overflow-hidden relative group">
@@ -507,7 +520,7 @@ export default function ClinicApp() {
                     <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
                       <Search size={48} />
                     </div>
-                    <h3 className="text-xl font-bold tracking-tight">Archives & Intelligence</h3>
+                    <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Archives & Intelligence</h3>
                     <p className="text-slate-500 text-sm max-w-sm mx-auto mt-2">Access comprehensive patient history by searching for their unique Medical UID in the search bar above.</p>
                   </div>
                 )}
@@ -515,7 +528,7 @@ export default function ClinicApp() {
             )}
 
             {activeTab === 'reports' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-slate-900 dark:text-white">
                 <ReportCard 
                   title="EMR Throughput" 
                   value={system.getTotalVisitsThisMonth()} 
@@ -533,15 +546,15 @@ export default function ClinicApp() {
                   </div>
                   <div className="space-y-3 flex-1">
                     {frequentVisitors.length > 0 ? frequentVisitors.map(v => (
-                      <div key={v.id} className="flex justify-between items-center bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-slate-900 dark:text-white">
+                      <div key={v.id} className="flex justify-between items-center bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all">
                         <div className="flex items-center gap-4">
                           <div className="w-9 h-9 bg-slate-900 text-white rounded-lg flex items-center justify-center text-xs font-bold">{v.name[0]}</div>
-                          <span className="font-bold text-sm">{v.name}</span>
+                          <span className="font-bold text-sm leading-none">{v.name}</span>
                         </div>
                         <span className="text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-900 uppercase">Records Found</span>
                       </div>
                     )) : (
-                      <div className="h-full flex items-center justify-center opacity-30 italic text-sm py-20">Statistical data pending higher sample volume.</div>
+                      <div className="h-full flex items-center justify-center opacity-30 italic text-sm py-20 text-slate-400">Statistical data pending higher sample volume.</div>
                     )}
                   </div>
                 </div>
@@ -588,7 +601,7 @@ export default function ClinicApp() {
                   <h3 className="text-lg font-bold tracking-tight">EMR Conclusion</h3>
                   <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Electronic Prescription & Discharge</p>
                 </div>
-                <button onClick={() => setShowVisitModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"><X size={20} /></button>
+                <button onClick={() => setShowVisitModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-400 hover:text-slate-900 dark:hover:text-white"><X size={20} /></button>
              </div>
              
              <div className="bg-slate-50 dark:bg-slate-800 p-6 flex items-center gap-5 m-8 mb-0 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-900 dark:text-white">
@@ -636,13 +649,13 @@ export default function ClinicApp() {
   );
 }
 
-function FeatureItem({ text }) {
+function CheckItem({ text }) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center shrink-0 mt-0.5">
-        <Check size={14} className="text-white" />
+    <div className="flex items-center gap-4">
+      <div className="w-7 h-7 bg-white/10 rounded-full flex items-center justify-center shrink-0 border border-white/10">
+        <Check size={16} strokeWidth={3} className="text-white" />
       </div>
-      <p className="text-lg font-medium text-blue-50">{text}</p>
+      <p className="text-xl font-semibold text-blue-50">{text}</p>
     </div>
   );
 }
@@ -683,11 +696,11 @@ function ProfileRow({ label, value }) {
 
 function StatCard({ label, value, subValue, icon }) {
   return (
-    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-6 text-slate-900 dark:text-white">
-       <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center">{icon}</div>
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-6">
+       <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center shrink-0">{icon}</div>
        <div>
          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-         <p className="text-2xl font-black mt-0.5">{value}</p>
+         <p className="text-2xl font-black mt-0.5 tracking-tight">{value}</p>
          <p className="text-[10px] font-medium text-slate-500 mt-0.5">{subValue}</p>
        </div>
     </div>
@@ -696,7 +709,7 @@ function StatCard({ label, value, subValue, icon }) {
 
 function DoctorCard({ name, isServing, patient, onStart, onComplete, darkMode }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-8 items-center justify-between group relative overflow-hidden transition-all hover:shadow-lg text-slate-900 dark:text-white">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-8 items-center justify-between group relative overflow-hidden transition-all hover:shadow-lg">
       <div className={`absolute top-0 left-0 w-1.5 h-full transition-colors ${isServing ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-800'}`}></div>
       
       <div className="flex items-center gap-6">
@@ -704,8 +717,8 @@ function DoctorCard({ name, isServing, patient, onStart, onComplete, darkMode })
           {name.split(' ').map(n => n[0]).join('')}
         </div>
         <div>
-          <h4 className="text-2xl font-black tracking-tight">{name}</h4>
-          <p className="text-xs text-slate-400 font-medium uppercase tracking-widest mt-1">Surgical Specialist • Attending Consultant</p>
+          <h4 className="text-2xl font-black tracking-tight leading-none text-slate-900 dark:text-white">{name}</h4>
+          <p className="text-xs text-slate-400 font-medium uppercase tracking-widest mt-2">Surgical Specialist • Attending Consultant</p>
           <div className="flex items-center gap-3 mt-4">
              <span className={`flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-full border ${isServing ? 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-900/40' : 'bg-slate-50 text-slate-400 border-slate-100 dark:bg-slate-800 dark:border-slate-700'}`}>
                <span className={`w-1.5 h-1.5 rounded-full ${isServing ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300 dark:bg-slate-600'}`}></span> {isServing ? 'IN EMR SESSION' : 'AVAILABLE FOR TRIAGE'}
@@ -720,8 +733,8 @@ function DoctorCard({ name, isServing, patient, onStart, onComplete, darkMode })
              <div className="flex justify-between items-start">
                <div>
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Patient in consultation</p>
-                  <p className="text-lg font-bold">{patient.name}</p>
-                  <p className="text-[10px] text-slate-500 font-mono mt-0.5">{patient.id} • Registered Profile</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-white leading-none">{patient.name}</p>
+                  <p className="text-[10px] text-slate-500 font-mono mt-1.5">{patient.id} • Registered Profile</p>
                </div>
                <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center text-xs font-black shadow-sm border border-slate-100 dark:border-slate-600">45</div>
              </div>
@@ -773,7 +786,7 @@ function QueueItem({ patient, index, qNum, onCancel, isMissed, darkMode }) {
         <div>
           <div className="flex items-center gap-3">
             <p className="font-bold text-slate-900 dark:text-white leading-none">{patient.name}</p>
-            <span className="text-[9px] font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500 uppercase">{patient.id}</span>
+            <span className="text-[9px] font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500 uppercase leading-none">{patient.id}</span>
           </div>
           <p className="text-[10px] text-slate-400 mt-2 font-medium flex items-center gap-2">
              <Calendar size={10} /> {patient.age} yrs • <Phone size={10} /> {patient.phone}
@@ -816,8 +829,8 @@ function HistoryItem({ visit }) {
            <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">{new Date(visit.date).toLocaleDateString('en-IN', { dateStyle: 'long' })}</span>
            <span className="text-[10px] font-medium text-slate-400">{new Date(visit.date).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
-        <p className="text-xl font-bold tracking-tight mb-2">{visit.diagnosis}</p>
-        <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border-l-4 border-slate-900 dark:border-blue-600">
+        <p className="text-xl font-bold tracking-tight mb-2 leading-none">{visit.diagnosis}</p>
+        <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border-l-4 border-slate-900 dark:border-blue-600 mt-4">
            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Prescribed Treatment</p>
            <p className="text-sm font-medium italic text-slate-600 dark:text-slate-300">"{visit.prescription}"</p>
         </div>
@@ -830,12 +843,12 @@ function ReportCard({ title, value, trend, description, icon }) {
   return (
     <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-slate-900 dark:text-white">
       <div className="flex items-center justify-between mb-8">
-        <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-blue-600">{icon}</div>
+        <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-blue-600 shrink-0">{icon}</div>
         <span className="text-xs font-bold bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg border border-emerald-100">{trend}</span>
       </div>
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{title}</p>
-      <div className="text-6xl font-black mt-2 tracking-tighter">{value}</div>
-      <p className="text-xs text-slate-500 mt-4 leading-relaxed">{description}</p>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">{title}</p>
+      <div className="text-6xl font-black mt-3 tracking-tighter leading-none">{value}</div>
+      <p className="text-xs text-slate-500 mt-5 leading-relaxed">{description}</p>
     </div>
   );
 }
@@ -845,15 +858,15 @@ function CheckoutCard({ visit, patient, onPrint, doctorName, darkMode }) {
     <div className={`bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-lg animate-in slide-in-from-right-4 duration-500 ${darkMode ? 'dark' : ''} text-slate-900 dark:text-white`}>
       <div className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-slate-900 dark:bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow-md">{patient?.name?.[0] || 'P'}</div>
-          <div>
-            <p className="text-sm font-bold tracking-tight">{patient?.name || 'Unknown Profile'}</p>
-            <p className="text-[10px] text-slate-400 font-mono">{patient?.id}</p>
+          <div className="w-10 h-10 bg-slate-900 dark:bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow-md shrink-0">{patient?.name?.[0] || 'P'}</div>
+          <div className="overflow-hidden">
+            <p className="text-sm font-bold tracking-tight leading-none truncate">{patient?.name || 'Unknown Profile'}</p>
+            <p className="text-[10px] text-slate-400 font-mono mt-1 leading-none">{patient?.id}</p>
           </div>
         </div>
         <button 
           onClick={() => onPrint(patient, visit)}
-          className="p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition-all shadow-sm"
+          className="p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition-all shadow-sm shrink-0"
         >
           <FileText size={16} />
         </button>
@@ -864,10 +877,10 @@ function CheckoutCard({ visit, patient, onPrint, doctorName, darkMode }) {
         <p className="text-[11px] font-medium leading-relaxed truncate">{visit.diagnosis}: {visit.prescription}</p>
       </div>
       
-      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+      <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
         <div>
-           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Station Billing</p>
-           <p className="text-lg font-black text-slate-900 dark:text-blue-400 tracking-tight">₹500.00</p>
+           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Station Billing</p>
+           <p className="text-lg font-black text-slate-900 dark:text-blue-400 tracking-tight mt-1 leading-none">₹500.00</p>
         </div>
         <button 
           onClick={() => onPrint(patient, visit)}
