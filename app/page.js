@@ -390,10 +390,11 @@ export default function ClinicApp() {
                          <div className="space-y-5 max-h-[450px] overflow-y-auto pr-3 custom-scrollbar">
                            {searchResult.history.length > 0 ? [...searchResult.history].reverse().map((v, i) => (
                              <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-[#2d55a4]/50 transition-all">
-                               <div className="text-xs font-bold text-[#2d55a4] mb-2 uppercase tracking-tighter">{new Date(v.date).toLocaleDateString('en-IN', { dateStyle: 'long' })}</div>
-                               <p className="font-black text-lg mb-2">{v.diagnosis}</p>
-                               <div className="bg-slate-50 p-3 rounded-xl text-sm italic text-slate-500 border-l-4 border-slate-200">
-                                 Rx: {v.prescription}
+                               <div className="text-xs font-bold text-[#2d55a4] mb-3 uppercase tracking-[0.2em] opacity-70">{new Date(v.date).toLocaleDateString('en-IN', { dateStyle: 'long' })}</div>
+                               <p className="font-black text-5xl mb-4 tracking-tighter leading-none text-[#1e293b]">{v.diagnosis}</p>
+                               <div className="bg-slate-50 p-5 rounded-2xl text-lg italic text-slate-500 border-l-[6px] border-[#2d55a4] shadow-inner">
+                                 <span className="text-[#2d55a4] not-italic font-black text-xs uppercase block mb-1 opacity-60">Prescription Issued</span>
+                                 {v.prescription}
                                </div>
                              </div>
                            )) : (
