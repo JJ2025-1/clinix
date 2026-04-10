@@ -323,8 +323,10 @@ export default function ClinicApp() {
 
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
             <div>
-              <h2 className="text-2xl md:text-3xl font-black mb-1">Expresscare Medical Clinic</h2>
-              <p className="text-blue-100/70 dark:text-slate-400 text-sm font-bold">Open • {system.patients.length} Registered Patients</p>
+              <h2 className="text-2xl md:text-3xl font-black mb-1">Pulse QuickCare</h2>
+              <p className="text-blue-100/70 dark:text-slate-400 text-sm font-bold">
+                <span className="text-green-400 dark:text-green-500">Open</span> • {system.patients.length} Registered Patients
+              </p>
             </div>
             <div className="text-left md:text-right">
               <p className="text-xs md:text-sm font-medium opacity-80">{currentTime.toLocaleDateString('en-IN', { dateStyle: 'full', timeZone: 'Asia/Kolkata' })}</p>
