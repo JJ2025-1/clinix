@@ -227,10 +227,10 @@ export default function ClinicApp() {
   const frequentVisitors = system.getFrequentVisitors(1); // Set to >1 for better visibility in small datasets
 
   return (
-    <div className={`flex h-screen w-full bg-[#f4f6f8] text-[#1e293b] overflow-hidden font-sans ${darkMode ? 'dark bg-slate-900 text-slate-100' : ''}`}>
+    <div className={`flex h-screen w-full overflow-hidden font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900 text-slate-100' : 'bg-[#f4f6f8] text-[#1e293b]'}`}>
       
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex w-[72px] bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col items-center py-6 shrink-0 z-20">
+      <aside className="hidden md:flex w-[72px] bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col items-center py-6 shrink-0 z-20 transition-colors">
         <div className="w-11 h-11 bg-blue-50 dark:bg-blue-900/30 text-[#2d55a4] dark:text-blue-400 rounded-xl flex items-center justify-center font-black text-2xl mb-10 shadow-sm">
           C
         </div>
@@ -248,18 +248,18 @@ export default function ClinicApp() {
       </aside>
 
       {/* Sidebar - Mobile (Bottom Navigation) */}
-      <aside className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-around items-center z-50">
-        <button onClick={() => setActiveTab('home')} className={`p-2 rounded-xl ${activeTab === 'home' ? 'text-[#2d55a4] dark:text-blue-400' : 'text-slate-400'}`}><Home size={24} /></button>
-        <button onClick={() => setActiveTab('register')} className={`p-2 rounded-xl ${activeTab === 'register' ? 'text-[#2d55a4] dark:text-blue-400' : 'text-slate-400'}`}><Users size={24} /></button>
-        <button onClick={() => setActiveTab('history')} className={`p-2 rounded-xl ${activeTab === 'history' ? 'text-[#2d55a4] dark:text-blue-400' : 'text-slate-400'}`}><FileText size={24} /></button>
-        <button onClick={() => setActiveTab('reports')} className={`p-2 rounded-xl ${activeTab === 'reports' ? 'text-[#2d55a4] dark:text-blue-400' : 'text-slate-400'}`}><PieChart size={24} /></button>
+      <aside className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-around items-center z-50 transition-colors">
+        <button onClick={() => setActiveTab('home')} className={`p-2 rounded-xl transition-colors ${activeTab === 'home' ? 'text-[#2d55a4] dark:text-blue-400' : 'text-slate-400'}`}><Home size={24} /></button>
+        <button onClick={() => setActiveTab('register')} className={`p-2 rounded-xl transition-colors ${activeTab === 'register' ? 'text-[#2d55a4] dark:text-blue-400' : 'text-slate-400'}`}><Users size={24} /></button>
+        <button onClick={() => setActiveTab('history')} className={`p-2 rounded-xl transition-colors ${activeTab === 'history' ? 'text-[#2d55a4] dark:text-blue-400' : 'text-slate-400'}`}><FileText size={24} /></button>
+        <button onClick={() => setActiveTab('reports')} className={`p-2 rounded-xl transition-colors ${activeTab === 'reports' ? 'text-[#2d55a4] dark:text-blue-400' : 'text-slate-400'}`}><PieChart size={24} /></button>
         <button onClick={handleLogout} className="p-2 text-slate-400"><LogOut size={24} /></button>
       </aside>
 
       <main className="flex-1 flex flex-col h-full overflow-y-auto pb-16 md:pb-0">
         
         {/* Header */}
-        <div className="bg-[#2d55a4] dark:bg-slate-800 text-white px-4 md:px-10 py-5 md:py-7 shrink-0 relative shadow-lg">
+        <div className="bg-[#2d55a4] dark:bg-slate-800 text-white px-4 md:px-10 py-5 md:py-7 shrink-0 relative shadow-lg transition-colors">
           <header className="flex justify-between items-center mb-6 md:mb-8">
             <h1 className="text-xl md:text-2xl font-bold tracking-tight">Clinix Dashboard</h1>
             
@@ -271,7 +271,7 @@ export default function ClinicApp() {
                   placeholder="Search Patient ID" 
                   value={searchId}
                   onChange={(e) => setSearchId(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none shadow-inner"
+                  className="w-full bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none shadow-inner transition-colors"
                 />
               </form>
               <div className="flex items-center gap-3 md:gap-4">
@@ -279,7 +279,7 @@ export default function ClinicApp() {
                   <User size={20} className="cursor-pointer hover:text-blue-200" onClick={() => toggleMenu('profile')} />
                   {activeMenu === 'profile' && (
                     <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-5 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 z-[60] animate-in fade-in slide-in-from-top-2">
-                      <h4 className="font-bold border-b dark:border-slate-700 pb-2 mb-3">Doctor Profile</h4>
+                      <h4 className="font-bold border-b border-slate-100 dark:border-slate-700 pb-2 mb-3">Doctor Profile</h4>
                       <div className="space-y-2 text-sm">
                         <p><span className="text-slate-400 uppercase text-[10px] font-bold block">Name</span> <span className="font-bold">{doctorProfile.name}</span></p>
                         <p><span className="text-slate-400 uppercase text-[10px] font-bold block">ID</span> <span className="font-bold">{doctorProfile.id}</span></p>
@@ -292,7 +292,7 @@ export default function ClinicApp() {
                   <Bell size={20} className="cursor-pointer hover:text-blue-200" onClick={() => toggleMenu('notifications')} />
                   {activeMenu === 'notifications' && (
                     <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-5 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 z-[60] animate-in fade-in slide-in-from-top-2">
-                      <h4 className="font-bold border-b dark:border-slate-700 pb-2 mb-3">Notifications</h4>
+                      <h4 className="font-bold border-b border-slate-100 dark:border-slate-700 pb-2 mb-3">Notifications</h4>
                       <p className="text-xs text-slate-400 italic">No new notifications</p>
                     </div>
                   )}
@@ -301,12 +301,12 @@ export default function ClinicApp() {
                   <Settings size={20} className="cursor-pointer hover:text-blue-200" onClick={() => toggleMenu('settings')} />
                   {activeMenu === 'settings' && (
                     <div className="absolute right-0 mt-3 w-64 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 p-5 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 z-[60] animate-in fade-in slide-in-from-top-2">
-                      <h4 className="font-bold border-b dark:border-slate-700 pb-2 mb-3">Settings</h4>
+                      <h4 className="font-bold border-b border-slate-100 dark:border-slate-700 pb-2 mb-3">Settings</h4>
                       <div className="space-y-2">
                         <button className="w-full text-left text-sm hover:text-blue-600 transition-colors py-1">System Update</button>
                         <button 
                           onClick={() => setDarkMode(!darkMode)}
-                          className="w-full text-left text-sm hover:text-blue-600 transition-colors py-1 border-t dark:border-slate-700 pt-1 flex justify-between items-center"
+                          className="w-full text-left text-sm hover:text-blue-600 transition-colors py-1 border-t border-slate-100 dark:border-slate-700 pt-1 flex justify-between items-center"
                         >
                           <span>Dark Mode</span>
                           <div className={`w-8 h-4 rounded-full relative transition-colors ${darkMode ? 'bg-blue-600' : 'bg-slate-200'}`}>
