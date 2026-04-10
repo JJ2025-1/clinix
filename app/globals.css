@@ -1,57 +1,22 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --primary: #0ea5e9; /* Sky Blue */
-  --secondary: #64748b;
-  --card-bg: #ffffff;
-  --border: #e2e8f0;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617;
-    --foreground: #f8fafc;
-    --primary: #38bdf8;
-    --secondary: #94a3b8;
-    --card-bg: #1e293b;
-    --border: #334155;
-  }
-}
-
-/* Base styles for Tailwind 4 integration */
 @theme {
-  --color-primary: var(--primary);
-  --color-secondary: var(--secondary);
-  --color-card: var(--card-bg);
-  --color-border: var(--border);
+  --color-primary: #2d55a4;
+  --color-primary-dark: #1e3f80;
+  --color-background: #f4f6f8;
+  --color-card: #ffffff;
+  --color-text-main: #1e293b;
+  --color-text-muted: #64748b;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-border: #e2e8f0;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  min-height: 100vh;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--background);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--secondary);
-}
-
-/* Glassmorphism Effect */
-.glass {
-  background: rgba(var(--card-bg), 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  font-family: var(--font-geist-sans), sans-serif;
+  margin: 0;
+  padding: 0;
 }
