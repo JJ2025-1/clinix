@@ -1,72 +1,29 @@
-# Clinix — Advanced Clinic Management System
+# Student Management System (Clinix Edition)
 
-**Clinix** is a modern, high-performance Electronic Medical Record (EMR) and clinic management platform designed for clinicians who prioritize efficiency and security. Built with a "Clinical Light" aesthetic, it provides a distraction-free environment for managing patient life cycles from registration to final billing.
+This repository contains a dual-interface student management system:
+1. **C CLI**: A menu-driven command-line interface for local management (located in `cpp/`).
+2. **Next.js Web UI**: A professional full-stack web application for remote management.
 
-🔗 **Live Demo:** [https://clinix-three.vercel.app/](https://clinix-three.vercel.app/)
+## Features
+- **Add Student**: Add new student records.
+- **View All Students**: Display all stored student records.
+- **Search Student**: Find a student by their ID.
+- **Delete Student**: Remove a student record by their ID.
+- **Data Persistence**: Records are saved in binary files (C) and local storage (Web).
 
----
+## Full-Stack Side Note
+Beyond being a simple menu-driven C project, this repository implements **Full-Stack** architecture:
+- **Frontend**: Built with React (Next.js) and Tailwind CSS for a high-end, responsive user experience.
+- **Backend**: Utilizes Next.js logic for handling state and persistent storage.
+- **Database**: Supports local binary file persistence for the CLI and browser-based storage for the Web UI.
+- **Cross-Platform**: Designed to provide consistent data management across different interfaces.
 
-## 🚀 Key Features
+## How to Run (C)
+1. Navigate to the cpp directory: `cd cpp`
+2. Compile: `gcc student_management.c -o student_management`
+3. Run: `./student_management`
 
-### 🏥 Efficient Patient Triage
-*   **Live Queue Management:** Real-time tracking of patients in the waiting room.
-*   **"No Show" Recovery:** Specialized logic to handle missed appointments with a one-click "Let In" feature to restore patients to the active queue.
-*   **Instant Registration:** Quick initiation of new patient medical records with automated UID assignment.
-
-### 📄 Comprehensive EMR & Prescriptions
-*   **Digital Clinical Impressions:** Structured input for diagnoses and pharmacotherapy directives.
-*   **Secure History Access:** Authorization-protected search for retrieving full patient medical histories.
-*   **Professional Statements:** Generate and print standardized EMR statements and billing receipts on the fly.
-
-### 🩺 Clinician Workspace
-*   **Personalized Profiles:** Clinician-specific dashboards featuring specialization-based authorization.
-*   **Performance Analytics:** Real-time pulse reports on monthly throughput and patient cohorts.
-*   **Optimized UI:** A clean, distraction-free "Clinical Light" theme optimized for long hours of usage in medical environments.
-
----
-
-## 🛠️ Tech Stack
-
-*   **Frontend:** [Next.js](https://nextjs.org/) (React)
-*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-*   **Icons:** [Lucide React](https://lucide.dev/)
-*   **Architecture:** Client-side persistence for immediate performance and high availability.
-
----
-
-## 📦 Getting Started
-
-### Prerequisites
-*   Node.js 18.x or later
-*   npm or yarn
-
-### Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/JJ2025-1/clinix.git
-    cd clinix
-    ```
-
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
-
-4.  **Open the application:**
-    Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## 🛡️ Security & Privacy
-Clinix is designed with data integrity in mind. For this demonstration, all data is stored locally within the browser to ensure zero external data leakage, while maintaining a fully functional EMR experience.
-
----
-
-## 📄 License
-This project is private and intended for demonstration purposes.
+## How to Run (Web)
+1. Install dependencies: `npm install`
+2. Run development server: `npm run dev`
+3. Access at: `http://localhost:3000`
