@@ -1,27 +1,67 @@
-# Clinix: Clinic Management System
+# 🩺 Clinix: Advanced Clinic Management & Dual Patient-Clinician Portal
 
-Clinix is a professional management system designed for clinicians to maintain patient records and visit history through both a command-line interface and a modern web dashboard.
+**Clinix** is a state-of-the-art, full-stack clinic management system and electronic medical records (EMR) platform built with Next.js, React, and Tailwind CSS. It features a dual-role portal supporting both **Clinicians** and **Patients**, real-time triage queue tracking, digital pharmacotherapy prescriptions, and printable EMR statements.
 
-## Features
-- **Register Patient**: Create secure profiles for new patients with unique UIDs.
-- **Visit Records**: Track clinical impressions and pharmacotherapy directives.
-- **Search History**: Instant access to a patient's entire medical history.
-- **Reporting**: Identify frequent visitors and station throughput.
-- **Data Persistence**: Local binary storage (CLI) and localized web storage.
+---
 
-## Full-Stack Side Note
-Beyond its menu-driven C implementation, Clinix is a **Full-Stack** solution:
-- **Frontend**: A high-end React dashboard built with Next.js and Tailwind CSS, featuring a triage queue and EMR station.
-- **Backend**: Integrated business logic for handling real-time clinic operations and state management.
-- **EMR Integration**: Digital signature workflows for finalizing visit records and generating printable EMR statements.
-- **Cross-Platform**: Seamlessly manage records via the terminal or the clinician portal.
+## 🌟 Key Features
 
-## How to Run (C)
-1. Navigate to the cpp directory: `cd cpp`
-2. Compile: `gcc clinic_management.c -o clinic_management`
-3. Run: `./clinic_management`
+### 👨‍⚕️ Clinician Workspace Portal
+- **Active Station Console**: Initiate and finalize live consultations with active patient queue synchronization.
+- **Electronic Triage List**: Real-time queue management, live patient tracking, and "No Show" list restoration.
+- **Record Initiation & Search**: Register new patient profiles with auto-assigned UIDs and search full medical histories.
+- **EMR Finalization & Digital Signature**: Record clinical impressions and pharmacotherapy directives with automatic billing generation.
+- **Printable EMR Statements**: Generate official formatted printable diagnostic & prescription statements.
+- **Analytics & Reports**: Track monthly EMR throughput metrics and frequent patient cohort statistics.
 
-## How to Run (Web)
-1. Install dependencies: `npm install`
-2. Run development server: `npm run dev`
-3. Access at: `http://localhost:3000`
+### 👤 Patient Self-Service Portal
+- **Dual-Role Login**: Log in seamlessly using a **Patient UID** (e.g. `P101`) or registered mobile phone number.
+- **Live Queue Ticket Tracker**: Real-time consultation queue position, estimated wait times, and live "In Consultation" status alerts.
+- **Queue Participation**: Join or leave today's consultation queue with a single click.
+- **Digital Health Records & Prescriptions**: View past diagnosis records, dosage directives, and print official EMR statements.
+- **Patient Health Pass**: Digital identity pass displaying age, UID, emergency contact, and clinic hotline details.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Frontend & App Architecture**: [Next.js](https://nextjs.org/) (App Router), React 19, Tailwind CSS
+- **Design & UI Icons**: Lucide React icons, modern light mode theme, glassmorphism, responsive mobile layouts
+- **Logic & State**: Object-oriented `HospitalSystem` architecture with local storage persistence and demo data seeding
+- **CLI Implementation**: Menu-driven C application (`cpp/clinic_management.c`)
+
+---
+
+## 🚀 Getting Started
+
+### Web Application
+
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
+
+3. **Open Application**:
+   Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+### Command Line (C Version)
+
+1. Navigate to the C source directory:
+   ```bash
+   cd cpp
+   ```
+2. Compile:
+   ```bash
+   gcc clinic_management.c -o clinic_management
+   ```
+3. Execute:
+   ```bash
+   ./clinic_management
+   ```
