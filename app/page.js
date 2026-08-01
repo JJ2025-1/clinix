@@ -3,13 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import { HospitalSystem } from '@/lib/hospitalSystem';
 import {
-  Home, Users, FileText, BarChart3, Search, Bell, User, Settings, X, Stethoscope, MoreHorizontal, Activity, TrendingUp, LogOut, ChevronRight, Plus, Phone, Calendar, ArrowRight, CheckCircle2, Clock, Check, Layers
+  Home, Users, FileText, BarChart3, Search, Bell, User, Settings, X, Stethoscope, Activity, TrendingUp, LogOut, ChevronRight, Plus, Phone, Calendar, ArrowRight, CheckCircle2, Clock, Check, Layers, ShieldCheck, Printer, AlertCircle, RefreshCw
 } from 'lucide-react';
 
 export default function ClinicApp() {
   const [system, setSystem] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginRole, setLoginRole] = useState('clinician'); // 'clinician' | 'patient'
+  const [userRole, setUserRole] = useState(null); // 'clinician' | 'patient'
+  
   const [doctorProfile, setDoctorProfile] = useState({ name: '', id: '', phone: '', specialization: '' });
+  const [patientProfile, setPatientProfile] = useState({ id: '', name: '', phone: '', age: '' });
+  
+  const [patientQuery, setPatientQuery] = useState('');
+  const [isNewPatientReg, setIsNewPatientReg] = useState(false);
+
   const [activeTab, setActiveTab] = useState('home'); 
   const [queueTab, setQueueTab] = useState('upcoming');
   const [searchId, setSearchId] = useState('');
@@ -27,10 +35,29 @@ export default function ClinicApp() {
     const hs = new HospitalSystem();
     setSystem(hs);
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    const savedDoctor = localStorage.getItem('clinix_doctor');
-    if (savedDoctor) {
-      setDoctorProfile(JSON.parse(savedDoctor));
-      setIsLoggedIn(true);
+    
+    const savedRole = localStorage.getItem('clinix_role');
+    if (savedRole === 'clinician') {
+      const savedDoctor = localStorage.getItem('clinix_doctor');
+      if (savedDoctor) {
+        setDoctorProfile(JSON.parse(savedDoctor));
+        setUserRole('clinician');
+        setIsLoggedIn(true);
+      }
+    } else if (savedRole === 'patient') {
+      const savedPatient = localStorage.getItem('clinix_patient');
+      if (savedPatient) {
+        setPatientProfile(JSON.parse(savedPatient));
+        setUserRole('patient');
+        setIsLoggedIn(true);
+      }
+    } else {
+      const savedDoctor = localStorage.getItem('clinix_doctor');
+      if (savedDoctor) {
+        setDoctorProfile(JSON.parse(savedDoctor));
+        setUserRole('clinician');
+        setIsLoggedIn(true);
+      }
     }
     return () => clearInterval(timer);
   }, []);
@@ -43,7 +70,11 @@ export default function ClinicApp() {
   }, [message]);
 
   const toggleMenu = (menu) => setActiveMenu(activeMenu === menu ? null : menu);
-  const refreshData = () => setSystem(Object.assign(Object.create(Object.getPrototypeOf(system)), system));
+  const refreshData = () => {
+    if (system) {
+      setSystem(Object.assign(Object.create(Object.getPrototypeOf(system)), system));
+    }
+  };
 
   const handleCancel = (patientId) => {
     if (system.cancelPatient(patientId)) {
@@ -76,7 +107,7 @@ export default function ClinicApp() {
     setMessage({ type: 'success', text: `Consultation started with ${waiting[0].name}` });
   };
 
-  const handleLogin = (e) => {
+  const handleClinicianLogin = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const profile = {
@@ -86,14 +117,62 @@ export default function ClinicApp() {
       specialization: formData.get('specialization')
     };
     setDoctorProfile(profile);
+    setUserRole('clinician');
     setIsLoggedIn(true);
+    localStorage.setItem('clinix_role', 'clinician');
     localStorage.setItem('clinix_doctor', JSON.stringify(profile));
+  };
+
+  const handlePatientLogin = (e) => {
+    e.preventDefault();
+    if (!patientQuery.trim()) return;
+    const result = system.findPatient(patientQuery);
+    if (result && result.patient) {
+      setPatientProfile(result.patient);
+      setUserRole('patient');
+      setIsLoggedIn(true);
+      localStorage.setItem('clinix_role', 'patient');
+      localStorage.setItem('clinix_patient', JSON.stringify(result.patient));
+      setMessage({ type: 'success', text: `Welcome back, ${result.patient.name}!` });
+    } else {
+      setMessage({ type: 'error', text: 'Patient UID / Phone not found. Register as new patient below.' });
+    }
+  };
+
+  const handlePatientQuickSelect = (p) => {
+    setPatientProfile(p);
+    setUserRole('patient');
+    setIsLoggedIn(true);
+    localStorage.setItem('clinix_role', 'patient');
+    localStorage.setItem('clinix_patient', JSON.stringify(p));
+    setMessage({ type: 'success', text: `Welcome, ${p.name}!` });
+  };
+
+  const handlePatientSelfRegister = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try {
+      const newP = system.registerPatient(formData.get('name'), formData.get('age'), formData.get('phone'));
+      setPatientProfile(newP);
+      setUserRole('patient');
+      setIsLoggedIn(true);
+      localStorage.setItem('clinix_role', 'patient');
+      localStorage.setItem('clinix_patient', JSON.stringify(newP));
+      setMessage({ type: 'success', text: `Registered successfully! Your UID is ${newP.id}` });
+      refreshData();
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message });
+    }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setUserRole(null);
+    localStorage.removeItem('clinix_role');
     localStorage.removeItem('clinix_doctor');
+    localStorage.removeItem('clinix_patient');
     setDoctorProfile({ name: '', id: '', phone: '', specialization: '' });
+    setPatientProfile({ id: '', name: '', phone: '', age: '' });
   };
 
   const handleRegister = (e) => {
@@ -135,6 +214,33 @@ export default function ClinicApp() {
     }
   };
 
+  const handlePatientJoinQueue = () => {
+    if (!patientProfile || !patientProfile.id) return;
+    const isWaiting = system.patients.some(p => p.id === patientProfile.id);
+    const isServing = servingPatient && servingPatient.id === patientProfile.id;
+    if (isServing || isWaiting) {
+      setMessage({ type: 'error', text: 'You are already in active queue!' });
+      return;
+    }
+    const isMissed = system.missed.some(p => p.id === patientProfile.id);
+    if (isMissed) {
+      system.restorePatient(patientProfile.id);
+    } else {
+      system.patients.push(patientProfile);
+      system.save();
+    }
+    setMessage({ type: 'success', text: 'Successfully joined consultation queue!' });
+    refreshData();
+  };
+
+  const handlePatientLeaveQueue = () => {
+    if (!patientProfile || !patientProfile.id) return;
+    if (system.cancelPatient(patientProfile.id)) {
+      setMessage({ type: 'success', text: 'You have left the queue.' });
+      refreshData();
+    }
+  };
+
   const handlePrint = (patient, visit) => {
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
@@ -154,7 +260,7 @@ export default function ClinicApp() {
           <div class="header"><h1 style="color:#1a4fbc">CLINIX</h1><p>Electronic Medical Record (EMR)</p></div>
           <div class="meta">
             <div><p><b>Patient:</b> ${patient.name}</p><p><b>UID:</b> ${patient.id}</p></div>
-            <div><p><b>Clinician:</b> Dr. ${doctorProfile.name}</p><p><b>Date:</b> ${new Date(visit.date).toLocaleString('en-IN')}</p></div>
+            <div><p><b>Clinician:</b> Dr. ${doctorProfile.name || 'On Duty Specialist'}</p><p><b>Date:</b> ${new Date(visit.date).toLocaleString('en-IN')}</p></div>
           </div>
           <div class="diagnosis"><b>Clinical Impression:</b><br/> ${visit.diagnosis}</div>
           <div class="prescription"><b>Prescription:</b><br/> ${visit.prescription}</div>
@@ -177,9 +283,11 @@ export default function ClinicApp() {
     );
   }
 
+  // ===================== LOGIN SCREEN (ROLE SWITCHER) =====================
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen w-full flex flex-col md:flex-row bg-[#f8faff] font-sans selection:bg-blue-100">
+        {/* Left Branding */}
         <div className="flex-1 flex flex-col justify-center px-10 md:px-24 py-16 text-slate-900">
           <div className="mb-12">
             <div className="text-4xl font-black tracking-tighter mb-16 flex items-center gap-2 text-[#1a4fbc]">
@@ -190,52 +298,531 @@ export default function ClinicApp() {
               <span className="text-[#1a4fbc]">Smarter.</span> Not Harder.
             </h1>
             <p className="text-xl md:text-2xl text-slate-500 max-w-xl leading-relaxed mb-12 font-medium">
-              Clinix is the all-in-one powered clinic management system that handles appointments, billing, EMR, prescriptions and more.
+              Clinix is the all-in-one powered clinic management system that handles appointments, billing, EMR, prescriptions and patient records.
             </p>
             <div className="space-y-6 mb-16">
               <CheckItem text="Securely store and access patient history" dark={false} />
               <CheckItem text="Digital prescriptions and lab integration" dark={false} />
-              <CheckItem text="Enterprise-grade data encryption" dark={false} />
+              <CheckItem text="Real-time patient queue & live EMR sync" dark={false} />
             </div>
           </div>
         </div>
+
+        {/* Right Card with Role Switcher */}
         <div className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
-          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-[580px] p-10 md:p-16 text-slate-900 z-10 relative border border-blue-50">
-            <div className="mb-12 text-center md:text-left">
-              <h3 className="text-4xl font-bold mb-4 tracking-tight">Clinician Portal</h3>
-              <p className="text-slate-500 text-lg font-medium leading-relaxed">Fill in the details to access your workspace.</p>
-            </div>
-            <form onSubmit={handleLogin} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-sm font-bold text-slate-800">Full Name *</label>
-                  <input name="doctorName" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-5 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-lg font-medium" placeholder="Dr. Name" />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-sm font-bold text-slate-800">Specialization *</label>
-                  <input name="specialization" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-5 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-lg font-medium" placeholder="e.g. Cardiologist" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
-                  <label className="text-sm font-bold text-slate-800">Doc ID *</label>
-                  <input name="doctorId" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-5 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-lg font-medium" placeholder="DOC-123" />
-                </div>
-                <div className="space-y-3">
-                  <label className="text-sm font-bold text-slate-800">Phone *</label>
-                  <input name="doctorPhone" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-5 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-lg font-medium" placeholder="+91 98765 43210" />
-                </div>
-              </div>
-              <button type="submit" className="w-full bg-[#1a4fbc] text-white py-6 rounded-[20px] font-bold text-xl shadow-lg hover:bg-[#143d9a] transition-all flex items-center justify-center gap-3">
-                Enter Dashboard <ArrowRight size={24} />
+          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-[580px] p-8 md:p-14 text-slate-900 z-10 relative border border-blue-50">
+            
+            {/* Segmented Control Role Selector */}
+            <div className="flex bg-slate-100/80 p-1.5 rounded-2xl mb-8 border border-slate-200/60">
+              <button
+                type="button"
+                onClick={() => { setLoginRole('clinician'); setIsNewPatientReg(false); }}
+                className={`flex-1 py-3.5 px-4 text-sm font-black rounded-xl transition-all flex items-center justify-center gap-2 ${
+                  loginRole === 'clinician'
+                    ? 'bg-white text-[#1a4fbc] shadow-md shadow-blue-500/10'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                <Stethoscope size={18} /> Clinician Portal
               </button>
-            </form>
+              <button
+                type="button"
+                onClick={() => { setLoginRole('patient'); setIsNewPatientReg(false); }}
+                className={`flex-1 py-3.5 px-4 text-sm font-black rounded-xl transition-all flex items-center justify-center gap-2 ${
+                  loginRole === 'patient'
+                    ? 'bg-white text-[#1a4fbc] shadow-md shadow-blue-500/10'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                <User size={18} /> Patient Portal
+              </button>
+            </div>
+
+            {/* CLINICIAN LOGIN FORM */}
+            {loginRole === 'clinician' && (
+              <div>
+                <div className="mb-8 text-center md:text-left">
+                  <h3 className="text-3xl font-bold mb-2 tracking-tight">Clinician Portal</h3>
+                  <p className="text-slate-500 text-base font-medium leading-relaxed">Fill in the details to access your workstation workspace.</p>
+                </div>
+                <form onSubmit={handleClinicianLogin} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-800">Full Name *</label>
+                      <input name="doctorName" required defaultValue="Dr. Sarah Jenkins" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-base font-medium" placeholder="Dr. Name" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-800">Specialization *</label>
+                      <input name="specialization" required defaultValue="General Physician" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-base font-medium" placeholder="e.g. Cardiologist" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-800">Doc ID *</label>
+                      <input name="doctorId" required defaultValue="DOC-882" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-base font-medium" placeholder="DOC-123" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-800">Phone *</label>
+                      <input name="doctorPhone" required defaultValue="+91 98765 00000" className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-base font-medium" placeholder="+91 98765 43210" />
+                    </div>
+                  </div>
+                  <button type="submit" className="w-full bg-[#1a4fbc] text-white py-5 rounded-[20px] font-bold text-lg shadow-lg hover:bg-[#143d9a] transition-all flex items-center justify-center gap-3 active:scale-[0.99]">
+                    Enter Dashboard <ArrowRight size={22} />
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* PATIENT LOGIN / REGISTER FORM */}
+            {loginRole === 'patient' && (
+              <div>
+                {!isNewPatientReg ? (
+                  <div>
+                    <div className="mb-6 text-center md:text-left">
+                      <h3 className="text-3xl font-bold mb-2 tracking-tight">Patient Portal</h3>
+                      <p className="text-slate-500 text-sm font-medium leading-relaxed">Enter your Patient UID or Mobile Number to access your records & queue.</p>
+                    </div>
+
+                    <form onSubmit={handlePatientLogin} className="space-y-6">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-800">Patient UID or Registered Phone *</label>
+                        <input
+                          value={patientQuery}
+                          onChange={(e) => setPatientQuery(e.target.value)}
+                          required
+                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-base font-medium"
+                          placeholder="e.g. P101 or +91 98765 43210"
+                        />
+                      </div>
+
+                      {/* Quick Select demo pills if patients exist */}
+                      {system.patients && system.patients.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Quick Demo Select:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {system.patients.map(p => (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => handlePatientQuickSelect(p)}
+                                className="px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-xl text-xs font-bold text-[#1a4fbc] hover:bg-blue-100 transition-all flex items-center gap-1.5"
+                              >
+                                <span>{p.name}</span>
+                                <span className="text-[10px] opacity-75">({p.id})</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <button type="submit" className="w-full bg-[#1a4fbc] text-white py-5 rounded-[20px] font-bold text-lg shadow-lg hover:bg-[#143d9a] transition-all flex items-center justify-center gap-3 active:scale-[0.99]">
+                        Access Patient Portal <ArrowRight size={22} />
+                      </button>
+
+                      <div className="pt-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => setIsNewPatientReg(true)}
+                          className="text-xs font-bold text-[#1a4fbc] hover:underline"
+                        >
+                          First time here? Register as a New Patient
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="mb-6 text-center md:text-left">
+                      <h3 className="text-3xl font-bold mb-2 tracking-tight">New Patient Profile</h3>
+                      <p className="text-slate-500 text-sm font-medium leading-relaxed">Register your identity to join live triage & view health records.</p>
+                    </div>
+
+                    <form onSubmit={handlePatientSelfRegister} className="space-y-5">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-800">Full Legal Name *</label>
+                        <input name="name" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-base font-medium" placeholder="Your Full Name" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-slate-800">Age *</label>
+                          <input name="age" type="number" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-base font-medium" placeholder="Age" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-slate-800">Mobile Phone *</label>
+                          <input name="phone" required className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 focus:ring-4 focus:ring-blue-500/10 focus:border-[#1a4fbc] focus:bg-white outline-none transition-all text-base font-medium" placeholder="+91 98765 43210" />
+                        </div>
+                      </div>
+
+                      <button type="submit" className="w-full bg-[#1a4fbc] text-white py-4 rounded-[20px] font-bold text-lg shadow-lg hover:bg-[#143d9a] transition-all flex items-center justify-center gap-3 active:scale-[0.99]">
+                        Register & Enter Portal <ArrowRight size={22} />
+                      </button>
+
+                      <div className="pt-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => setIsNewPatientReg(false)}
+                          className="text-xs font-bold text-slate-500 hover:text-slate-800 hover:underline"
+                        >
+                          Already have a UID? Log in here
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         </div>
       </div>
     );
   }
 
+  // ===================== PATIENT DASHBOARD PORTAL VIEW =====================
+  if (userRole === 'patient') {
+    const patientData = system.searchPatient(patientProfile.id);
+    const history = patientData ? patientData.history : [];
+    const waitingPatients = getWaitingPatients();
+    
+    const isServing = servingPatient && servingPatient.id === patientProfile.id;
+    const posIndex = waitingPatients.findIndex(p => p.id === patientProfile.id);
+    const isInWaitingQueue = posIndex !== -1;
+    const isMissed = system.missed.some(p => p.id === patientProfile.id);
+
+    return (
+      <div className="min-h-screen w-full bg-[#f8faff] text-slate-900 flex flex-col font-sans">
+        
+        {/* Patient Top Header */}
+        <header className="bg-white border-b border-blue-100 px-6 md:px-12 py-5 sticky top-0 z-30 shadow-sm">
+          <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-[#1a4fbc]">
+                <Activity size={24} />
+              </div>
+              <div>
+                <h1 className="text-xl font-black text-[#1a4fbc] tracking-tight">Clinix</h1>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span> Patient Portal Access
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold text-slate-600">
+                <Clock size={16} className="text-[#1a4fbc]" />
+                {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+              <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
+                <div className="w-10 h-10 bg-[#1a4fbc] text-white rounded-xl flex items-center justify-center font-bold text-base shadow-md">
+                  {patientProfile.name?.[0] || 'P'}
+                </div>
+                <div className="hidden md:block text-left">
+                  <p className="text-xs font-black text-slate-900 leading-none">{patientProfile.name}</p>
+                  <p className="text-[10px] font-bold text-[#1a4fbc] mt-1 uppercase tracking-widest">{patientProfile.id}</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="p-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                  title="Logout"
+                >
+                  <LogOut size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Patient Dashboard Content */}
+        <main className="flex-1 max-w-[1400px] w-full mx-auto p-6 md:p-10 space-y-8">
+          
+          {/* Hero Welcome Banner */}
+          <div className="bg-gradient-to-r from-[#1a4fbc] via-blue-600 to-indigo-700 text-white rounded-[36px] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+              <div>
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md text-white text-xs font-bold mb-4 border border-white/20">
+                  <ShieldCheck size={16} /> Authenticated EMR Record
+                </span>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-3">
+                  Welcome back, {patientProfile.name}
+                </h2>
+                <p className="text-blue-100 text-base md:text-lg max-w-xl font-medium leading-relaxed">
+                  Track your live consultation status, access diagnostic impressions, and manage your electronic prescriptions.
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 flex items-center gap-6 self-start md:self-auto">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-200">Patient Identity</p>
+                  <p className="text-2xl font-black text-white mt-1">{patientProfile.id}</p>
+                </div>
+                <div className="h-10 w-px bg-white/20"></div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-blue-200">Registered Contact</p>
+                  <p className="text-sm font-bold text-white mt-1">{patientProfile.phone}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Metrics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-6 rounded-[28px] border border-blue-50 shadow-xl flex items-center gap-5">
+              <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-[#1a4fbc] shrink-0">
+                <Clock size={28} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Queue Position</p>
+                <p className="text-2xl font-black text-slate-900 mt-1">
+                  {isServing ? 'In Consultation' : isInWaitingQueue ? `#${posIndex + 1} in Line` : 'Not in Queue'}
+                </p>
+                <p className="text-[10px] font-bold text-[#1a4fbc] mt-1 uppercase">
+                  {isServing ? 'Active Session' : isInWaitingQueue ? `Est. wait ~${(posIndex + 1) * 10} mins` : 'Ready to request'}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-[28px] border border-blue-50 shadow-xl flex items-center gap-5">
+              <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0">
+                <FileText size={28} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Recorded EMR Visits</p>
+                <p className="text-2xl font-black text-slate-900 mt-1">{history.length} Visits</p>
+                <p className="text-[10px] font-bold text-emerald-600 mt-1 uppercase">Verified Records</p>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-[28px] border border-blue-50 shadow-xl flex items-center gap-5">
+              <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 shrink-0">
+                <Stethoscope size={28} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Duty Clinician</p>
+                <p className="text-xl font-black text-slate-900 mt-1 truncate max-w-[180px]">
+                  Dr. {doctorProfile.name || 'Sarah Jenkins'}
+                </p>
+                <p className="text-[10px] font-bold text-purple-600 mt-1 uppercase">
+                  {doctorProfile.specialization || 'General Physician'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Layout Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            {/* Left 2 Cols: Live Queue Ticket & History */}
+            <div className="lg:col-span-2 space-y-8">
+              
+              {/* Live Consultation Queue Status Card */}
+              <section className="bg-white rounded-[32px] border border-blue-100 p-8 shadow-xl relative overflow-hidden">
+                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-[#1a4fbc] animate-ping"></div>
+                    <h3 className="text-xl font-black tracking-tight">Live Consultation Status</h3>
+                  </div>
+                  <button
+                    onClick={refreshData}
+                    className="p-2 text-slate-400 hover:text-[#1a4fbc] hover:bg-blue-50 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold"
+                  >
+                    <RefreshCw size={16} /> Sync Queue
+                  </button>
+                </div>
+
+                {isServing ? (
+                  <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-6 text-emerald-900 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg animate-bounce">
+                        <Stethoscope size={28} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-200/80 px-2.5 py-1 rounded-md text-emerald-900">Session Active</span>
+                        <h4 className="text-2xl font-black mt-2">Consultation in Progress!</h4>
+                        <p className="text-xs font-bold text-emerald-700 mt-1">Please enter Room #1 to meet Dr. {doctorProfile.name || 'Sarah'}.</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : isInWaitingQueue ? (
+                  <div className="bg-blue-50/70 border border-blue-200 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-[#1a4fbc] text-white rounded-2xl flex items-center justify-center font-black text-2xl shadow-lg">
+                        #{posIndex + 1}
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-100 text-[#1a4fbc] px-2.5 py-1 rounded-md">Queue Active</span>
+                        <h4 className="text-xl font-black mt-2 text-slate-900">You are #{posIndex + 1} in the queue</h4>
+                        <p className="text-xs font-bold text-slate-500 mt-1">Estimated wait time: ~{(posIndex + 1) * 10} minutes</p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handlePatientLeaveQueue}
+                      className="px-6 py-3 bg-white border border-rose-200 text-rose-600 rounded-xl font-black text-xs hover:bg-rose-50 transition-all shrink-0"
+                    >
+                      Leave Queue
+                    </button>
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center flex flex-col items-center justify-center">
+                    <div className="w-16 h-16 bg-blue-100/60 rounded-full flex items-center justify-center text-[#1a4fbc] mb-4">
+                      <Plus size={32} />
+                    </div>
+                    <h4 className="text-xl font-black text-slate-900">Not Currently in Queue</h4>
+                    <p className="text-slate-500 text-sm font-medium mt-1 mb-6 max-w-md">
+                      Would you like to join today’s consultation queue to visit the doctor?
+                    </p>
+                    <button
+                      onClick={handlePatientJoinQueue}
+                      className="bg-[#1a4fbc] text-white px-8 py-4 rounded-2xl font-black text-sm shadow-lg shadow-blue-500/20 hover:bg-[#143d9a] transition-all flex items-center gap-2"
+                    >
+                      <Plus size={18} /> Join Today’s Consultation Queue
+                    </button>
+                  </div>
+                )}
+              </section>
+
+              {/* Electronic Medical Records Timeline */}
+              <section className="bg-white rounded-[32px] border border-blue-100 p-8 shadow-xl">
+                <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
+                  <h3 className="text-xl font-black tracking-tight flex items-center gap-2">
+                    <FileText className="text-[#1a4fbc]" size={22} /> Medical History & Prescriptions
+                  </h3>
+                  <span className="text-xs font-bold bg-blue-50 text-[#1a4fbc] px-3 py-1.5 rounded-lg border border-blue-100">
+                    {history.length} Verified Records
+                  </span>
+                </div>
+
+                {history.length > 0 ? (
+                  <div className="space-y-6">
+                    {[...history].reverse().map((visit, idx) => (
+                      <div key={idx} className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-6 space-y-4 hover:border-blue-300 transition-all">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                          <span className="text-xs font-black text-[#1a4fbc] uppercase tracking-wider">
+                            Visit Date: {new Date(visit.date).toLocaleDateString('en-IN', { dateStyle: 'full' })}
+                          </span>
+                          <button
+                            onClick={() => handlePrint(patientProfile, visit)}
+                            className="px-4 py-2 bg-white text-[#1a4fbc] border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-50 transition-all flex items-center gap-2 self-start sm:self-auto"
+                          >
+                            <Printer size={16} /> Print EMR Statement
+                          </button>
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Clinical Impression / Diagnosis</p>
+                          <p className="text-lg font-black text-slate-900 mt-1">{visit.diagnosis}</p>
+                        </div>
+                        <div className="bg-blue-50/60 p-4 rounded-xl border-l-4 border-[#1a4fbc]">
+                          <p className="text-[10px] font-black text-[#1a4fbc] uppercase tracking-widest">Prescribed Pharmacotherapy Directive</p>
+                          <p className="text-sm font-bold text-slate-700 mt-1 whitespace-pre-line leading-relaxed">
+                            {visit.prescription}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    <FileText size={48} className="mx-auto text-slate-200 mb-4" />
+                    <p className="text-slate-500 font-bold text-sm uppercase tracking-wider">No electronic medical history recorded yet.</p>
+                    <p className="text-slate-400 text-xs mt-1">Your doctor will update your EMR prescriptions after consultation.</p>
+                  </div>
+                )}
+              </section>
+
+            </div>
+
+            {/* Right 1 Col: Patient Card Info & Clinic Details */}
+            <div className="space-y-8">
+              
+              {/* Patient Identity Card */}
+              <section className="bg-white rounded-[32px] border border-blue-100 p-6 shadow-xl">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Patient Health Card</h4>
+                
+                <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden space-y-6">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-xs text-slate-400 font-black uppercase">Clinix Health Pass</p>
+                      <h5 className="text-xl font-black mt-1 text-white">{patientProfile.name}</h5>
+                    </div>
+                    <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center font-bold text-white text-lg">
+                      {patientProfile.name?.[0]}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 border-t border-slate-700/80 pt-4">
+                    <div>
+                      <p className="text-[9px] font-black text-slate-400 uppercase">Patient UID</p>
+                      <p className="text-base font-black text-blue-400 mt-0.5">{patientProfile.id}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black text-slate-400 uppercase">Age</p>
+                      <p className="text-base font-black text-white mt-0.5">{patientProfile.age} Years</p>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-700/80 pt-4">
+                    <p className="text-[9px] font-black text-slate-400 uppercase">Emergency Contact</p>
+                    <p className="text-sm font-bold text-slate-200 mt-0.5">{patientProfile.phone}</p>
+                  </div>
+                </div>
+              </section>
+
+              {/* Clinic Support Info */}
+              <section className="bg-white rounded-[32px] border border-blue-100 p-6 shadow-xl space-y-4">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Clinic Information</h4>
+                
+                <div className="space-y-4 text-sm font-medium">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center text-[#1a4fbc] shrink-0">
+                      <Stethoscope size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-slate-900">Dr. {doctorProfile.name || 'Sarah Jenkins'}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">{doctorProfile.specialization || 'Senior Consultant'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 shrink-0">
+                      <Phone size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-slate-900">Clinic Reception Hotline</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">+91 1800-CLINIX-EMR</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 shrink-0">
+                      <Clock size={18} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-slate-900">OPD Consultation Hours</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">Mon - Sat: 09:00 AM - 07:00 PM</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+
+          </div>
+
+        </main>
+
+        {/* Toast */}
+        {message && (
+          <div className="fixed bottom-10 right-1/2 translate-x-1/2 md:translate-x-0 md:right-10 px-8 py-4 rounded-2xl shadow-2xl z-[200] flex items-center gap-4 text-[#1a4fbc] font-black animate-in slide-in-from-bottom bg-white border border-blue-100">
+             {message.type === 'error' ? <X className="text-rose-500" /> : <CheckCircle2 className="text-emerald-500" />}
+             <span className="text-sm uppercase tracking-tight">{message.text}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ===================== CLINICIAN DASHBOARD VIEW =====================
   const waitingPatients = getWaitingPatients();
   const frequentVisitors = system.getFrequentVisitors(1);
 
@@ -253,7 +840,7 @@ export default function ClinicApp() {
           <SideIcon icon={<FileText size={24} />} active={activeTab === 'history'} label="History" onClick={() => setActiveTab('history')} />
           <SideIcon icon={<BarChart3 size={24} />} active={activeTab === 'reports'} label="Reports" onClick={() => setActiveTab('reports')} />
         </div>
-        <button onClick={handleLogout} className="mt-auto p-4 text-slate-400 hover:text-rose-500 transition-colors"><LogOut size={24} /></button>
+        <button onClick={handleLogout} className="mt-auto p-4 text-slate-400 hover:text-rose-500 transition-colors" title="Logout"><LogOut size={24} /></button>
       </aside>
 
       {/* Mobile Navigation */}
@@ -475,7 +1062,7 @@ export default function ClinicApp() {
 
       {/* Toast */}
       {message && (
-        <div className={`fixed bottom-28 md:bottom-12 right-1/2 translate-x-1/2 md:translate-x-0 md:right-12 px-8 py-4 rounded-2xl shadow-2xl z-[200] flex items-center gap-4 text-[#1a4fbc] font-black animate-in slide-in-from-bottom bg-white border border-blue-100`}>
+        <div className="fixed bottom-28 md:bottom-12 right-1/2 translate-x-1/2 md:translate-x-0 md:right-12 px-8 py-4 rounded-2xl shadow-2xl z-[200] flex items-center gap-4 text-[#1a4fbc] font-black animate-in slide-in-from-bottom bg-white border border-blue-100">
            {message.type === 'error' ? <X className="text-rose-500" /> : <CheckCircle2 className="text-emerald-500" />} <span className="text-sm uppercase tracking-tight">{message.text}</span>
         </div>
       )}

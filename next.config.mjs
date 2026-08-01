@@ -1,3 +1,5 @@
+import path from 'path';
+
 /** @type {import('next').NextConfig} */
 const isGithubActions = process.env.GITHUB_ACTIONS || false;
 
@@ -10,6 +12,9 @@ const nextConfig = {
   trailingSlash: true,
   images: {
     unoptimized: true,
+  },
+  turbopack: {
+    root: path.resolve('.'),
   },
 };
 
